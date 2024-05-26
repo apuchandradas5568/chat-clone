@@ -50,16 +50,13 @@ function AuthForm() {
     }
     if (varient === "login") {
       // login user
-      signIn('credentials', { ...data })
-    .then((callback) => {
-      console.log(callback);
-      
+      signIn('credentials', { ...data, redirect: false})
+    .then((callback) => {      
       if (callback?.error) {
         toast.error(callback.error, { icon: '❌' }); // More specific error message
-      } else {
-        toast.success('Logged In', { icon: '' });
-        // Redirect user after successful login (optional)
-        // router.push('/dashboard');
+      } 
+      if(callback?.ok && !callback.error) {
+        toast.success('Login Successful', { icon: '🚀' });
       }
     })
     .catch((error) => {
@@ -77,7 +74,18 @@ function AuthForm() {
 
   const socialAction = (action: string) => {
     setIsLoading(true);
-    // perform social action
+    signIn(action, { redirect: false })
+    .then((callback) => {
+      if (callback?.error) {
+        toast.error(callback.error, { icon: '❌' });
+      } 
+      if(callback?.ok && !callback.error) {
+        toast.success('Login Successful', { icon: '🚀' });
+      }
+    
+    }).finally(()=>{
+      setIsLoading(false)
+    })
   };
 
   return (
