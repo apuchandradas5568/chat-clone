@@ -11,7 +11,7 @@ export async function POST(request:Request){
     const  {email, name, password} = body
 
     if(!email || !name || !password){
-        return new NextResponse('Invalid Credentials', {status: 400})
+        return new NextResponse('Missing Info', {status: 400})
     }
 
     const hashedPassword = await bcrypt.hash(password, 12)
@@ -29,5 +29,4 @@ export async function POST(request:Request){
     } catch (error) {
         return new NextResponse('User already exists', {status: 400})
     }
-
 }

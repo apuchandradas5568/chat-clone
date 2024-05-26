@@ -1,11 +1,14 @@
 "use client";
 
+import axios from "axios";
 import AuthSocialButton from "@/app/components/AuthSocialButton";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/inputs/input";
 import { useCallback, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { BsGithub, BsGoogle } from "react-icons/bs";
+import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
 type Varient = "login" | "register";
 
 function AuthForm() {
@@ -38,12 +41,38 @@ function AuthForm() {
 
     if (varient === "register") {
       // register user
+      axios.post("/api/register", data)
+      .catch(()=>{
+        toast('Something Went Wrong', {icon: '❌'})
+      }).finally(()=>{
+        setIsLoading(false)
+      })
     }
     if (varient === "login") {
       // login user
+      signIn('credentials', { ...data })
+    .then((callback) => {
+      console.log(callback);
+      
+      if (callback?.error) {
+        toast.error(callback.error, { icon: '❌' }); // More specific error message
+      } else {
+        toast.success('Logged In', { icon: '' });
+        // Redirect user after successful login (optional)
+        // router.push('/dashboard');
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      toast.error('Login failed. Please try again.', { icon: '❌' }); // Generic error message
+    })
+      
+      
+      .finally(()=> {
+        setIsLoading(false)
+      })
     }
-    console.log(data);
-    setIsLoading(false);
+    // setIsLoading(false);
   };
 
   const socialAction = (action: string) => {
