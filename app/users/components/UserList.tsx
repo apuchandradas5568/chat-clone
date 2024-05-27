@@ -21,7 +21,7 @@ const UserList: React.FC<UserListProps> = ({ items }) => {
     overflow-y-auto
     overflow-x-hidden
     bg-white
-    h-screen
+    h-full
     border-r
     border-gray-200
     block

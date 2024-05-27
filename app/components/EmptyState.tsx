@@ -7,11 +7,12 @@ const EmptyState = () => {
     py-10
     sm:px-6
     lg:px-8
-    h-screen
+    h-full
     flex
     justify-center
     items-center
     bg-gray-100
+    
     "
     >
 
