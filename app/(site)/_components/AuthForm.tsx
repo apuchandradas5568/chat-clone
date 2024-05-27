@@ -4,17 +4,25 @@ import axios from "axios";
 import AuthSocialButton from "@/app/components/AuthSocialButton";
 import Button from "@/app/components/Button";
 import Input from "@/app/components/inputs/input";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { BsGithub, BsGoogle } from "react-icons/bs";
 import toast from "react-hot-toast";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 type Varient = "login" | "register";
 
 function AuthForm() {
   const [varient, setVarient] = useState<Varient>("login");
-
+  const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (session?.status === "authenticated") {
+      router.push("/users");
+    }
+  }, [session?.status, router]);
 
   const toggleVarient = useCallback(() => {
     if (varient === "login") {
@@ -41,33 +49,38 @@ function AuthForm() {
 
     if (varient === "register") {
       // register user
-      axios.post("/api/register", data)
-      .catch(()=>{
-        toast('Something Went Wrong', {icon: '❌'})
-      }).finally(()=>{
-        setIsLoading(false)
-      })
+      axios
+        .post("/api/register", data)
+        .then(() => {
+          signIn("credentials", data);
+        })
+        .catch(() => {
+          toast("Something Went Wrong", { icon: "❌" });
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
     if (varient === "login") {
       // login user
-      signIn('credentials', { ...data, redirect: false})
-    .then((callback) => {      
-      if (callback?.error) {
-        toast.error(callback.error, { icon: '❌' }); // More specific error message
-      } 
-      if(callback?.ok && !callback.error) {
-        toast.success('Login Successful', { icon: '🚀' });
-      }
-    })
-    .catch((error) => {
-      console.error(error);
-      toast.error('Login failed. Please try again.', { icon: '❌' }); // Generic error message
-    })
-      
-      
-      .finally(()=> {
-        setIsLoading(false)
-      })
+      signIn("credentials", { ...data, redirect: false })
+        .then((callback) => {
+          if (callback?.error) {
+            toast.error(callback.error, { icon: "❌" }); // More specific error message
+          }
+          if (callback?.ok && !callback.error) {
+            toast.success("Login Successful", { icon: "🚀" });
+            router.push("/users");
+          }
+        })
+        .catch((error) => {
+          console.error(error);
+          toast.error("Login failed. Please try again.", { icon: "❌" }); // Generic error message
+        })
+
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
     // setIsLoading(false);
   };
@@ -75,17 +88,17 @@ function AuthForm() {
   const socialAction = (action: string) => {
     setIsLoading(true);
     signIn(action, { redirect: false })
-    .then((callback) => {
-      if (callback?.error) {
-        toast.error(callback.error, { icon: '❌' });
-      } 
-      if(callback?.ok && !callback.error) {
-        toast.success('Login Successful', { icon: '🚀' });
-      }
-    
-    }).finally(()=>{
-      setIsLoading(false)
-    })
+      .then((callback) => {
+        if (callback?.error) {
+          toast.error(callback.error, { icon: "❌" });
+        }
+        if (callback?.ok && !callback.error) {
+          toast.success("Login Successful", { icon: "🚀" });
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
   };
 
   return (
@@ -109,8 +122,7 @@ function AuthForm() {
             type="email"
             errors={errors}
             register={register}
-              disabled={isLoading}
-
+            disabled={isLoading}
           />
           <Input
             name="password"
@@ -119,8 +131,7 @@ function AuthForm() {
             type="password"
             errors={errors}
             register={register}
-              disabled={isLoading}
-
+            disabled={isLoading}
           />
           <div>
             <Button disabled={isLoading} fullWidth type="submit">
