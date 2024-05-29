@@ -11,6 +11,10 @@ interface MessageInputProps {
   errors: FieldErrors;
 }
 
+
+
+
+
 const MessageInput: React.FC<MessageInputProps> = ({
   register,
   id,
