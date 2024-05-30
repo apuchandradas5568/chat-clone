@@ -3,10 +3,12 @@
 import useOtherUser from "@/app/hooks/useOtherUser";
 import { Conversation, User } from "@prisma/client";
 import { format } from "date-fns";
-import { Fragment, useMemo } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import { IoClose, IoTrash } from "react-icons/io5";
 import Avatar from "@/app/components/Avatar";
+import Modal from "@/app/components/Modal";
+import ConfirmModal from "./ConfirmModal";
 
 interface ProfileDrawerProps {
   data: Conversation & {
@@ -22,6 +24,7 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   onClose,
 }) => {
   const otherUser = useOtherUser(data);
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const joinDate = useMemo(() => {
     return format(new Date(otherUser.createdAt), "PP");
@@ -40,7 +43,22 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
   }, [data]);
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
+   <>
+
+   {/* <Modal
+   isOpen = {isModalOpen}
+    onClose={()=>setIsModalOpen(false)}>
+
+        <div className="bg-white p-5">
+            <p>Hello Modal!</p>
+        </div>
+
+    </Modal> */}
+
+    <ConfirmModal isOpen = {isModalOpen}
+    onClose={()=>setIsModalOpen(false)}  />
+   
+   <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className={`relative z-50`} onClose={onClose}>
         <Transition.Child
           as={Fragment}
@@ -155,10 +173,12 @@ const ProfileDrawer: React.FC<ProfileDrawerProps> = ({
     "
                         >
                           <div
+                            onClick={() => setIsModalOpen(true)}
+
                             className="
         flex flex-col gap-3 itemx-center cursor-pointer hover:opacity 
         "
-                            onClick={() => {}}
+                            
                           >
                             <div className="w-10 h-10 bg-neutral-100 rounded-full flex  items-center justify-center">
                               <IoTrash size={20} />
@@ -255,6 +275,7 @@ sm:col-span-2
         </div>
       </Dialog>
     </Transition.Root>
+   </>
   );
 };
 
