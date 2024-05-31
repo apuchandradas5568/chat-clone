@@ -9,16 +9,19 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    console.log("body", body);
-
     const { userId, isGroup, members, name } = body;
 
     if (!currentUser?.id || !currentUser?.email) {
       return new NextResponse("Unauthorized", { status: 401 });
     }
 
-    if (isGroup && (!members || members.length < 2 || !name)) {
-      return new NextResponse("Invalid data", { status: 400 });
+    // if (isGroup && (!members || members.length < 2 || !name)) {
+    //   return new NextResponse("Invalid data", { status: 400 });
+    // }
+    if(isGroup) {
+      if(!members || members.length < 2 || !name){
+        return new NextResponse('Invalid data', {status: 400})
+      }
     }
 
     if (isGroup) {
@@ -28,22 +31,18 @@ export async function POST(request: Request) {
           isGroup,
           users: {
             connect: [
-              ...members.map((member: { value: string }) => {
-                id: member.value;
-              }),
-              {
-                id: currentUser.id,
-              },
-            ],
-          },
+              ...members.map((member: { value: string }) => ({ id: member.value })),
+              { id: currentUser.id }
+            ]
+          }
         },
         include: {
-          users: true,
-        },
+          users: true
+        }
       });
-
-      console.log("group", newConversation);
-
+    
+      console.log("Group Conversation created:", newConversation);
+      
       return NextResponse.json(newConversation);
     }
 
@@ -80,21 +79,9 @@ export async function POST(request: Request) {
         users: true,
       },
     });
-    console.log("new conversations",newConversation);
+    console.log("new conversations", newConversation);
 
     return NextResponse.json(newConversation);
-
-
-
-
-
-
-
-
-
-
-
-
   } catch (error: any) {
     return new Response("Internal Error", { status: 500 });
   }

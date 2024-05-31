@@ -9,9 +9,6 @@ interface  Iparams {
 export async function DELETE (request:Request, {params} : {params: Iparams}){
 
 
-    console.log(params);
-    
-
     try {
 
         const {conversationId} = params
