@@ -2,6 +2,7 @@ import getCurrentUser from "@/app/actions/getCurrentUser";
 import { NextResponse } from "next/server";
 
 import prisma from "@/app/libs/prisma.db";
+import { pusherServer } from "@/app/libs/pusher";
 
 export async function POST(request: Request) {
   try {
@@ -18,9 +19,9 @@ export async function POST(request: Request) {
     // if (isGroup && (!members || members.length < 2 || !name)) {
     //   return new NextResponse("Invalid data", { status: 400 });
     // }
-    if(isGroup) {
-      if(!members || members.length < 2 || !name){
-        return new NextResponse('Invalid data', {status: 400})
+    if (isGroup) {
+      if (!members || members.length < 2 || !name) {
+        return new NextResponse("Invalid data", { status: 400 });
       }
     }
 
@@ -31,18 +32,20 @@ export async function POST(request: Request) {
           isGroup,
           users: {
             connect: [
-              ...members.map((member: { value: string }) => ({ id: member.value })),
-              { id: currentUser.id }
-            ]
-          }
+              ...members.map((member: { value: string }) => ({
+                id: member.value,
+              })),
+              { id: currentUser.id },
+            ],
+          },
         },
         include: {
-          users: true
-        }
+          users: true,
+        },
       });
-    
+
       console.log("Group Conversation created:", newConversation);
-      
+
       return NextResponse.json(newConversation);
     }
 
@@ -79,7 +82,12 @@ export async function POST(request: Request) {
         users: true,
       },
     });
-    console.log("new conversations", newConversation);
+
+    newConversation.users.map((user) => {
+      if (user.email) {
+        pusherServer.trigger(user.email!, "conversation:new", newConversation);
+      }
+    });
 
     return NextResponse.json(newConversation);
   } catch (error: any) {
