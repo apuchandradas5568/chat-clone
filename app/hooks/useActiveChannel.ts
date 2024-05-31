@@ -40,8 +40,10 @@ useEffect(()=>{
         }
 
 
-},[set, add, remove, activeChannel])
+},[set, add, remove])
 
 }
 
 export default useActiveChannel
+
+

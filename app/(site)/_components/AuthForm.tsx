@@ -71,6 +71,7 @@ function AuthForm() {
           if (callback?.ok && !callback.error) {
             toast.success("Login Successful", { icon: "🚀" });
             router.push("/users");
+            router.refresh()
           }
         })
         .catch((error) => {
